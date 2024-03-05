@@ -1,5 +1,21 @@
 #!/bin/bash
 
+spinner() {
+  local pid=$1
+  local delay=0.15
+  local spinstr='|/-\'
+  local i=0
+  
+  while ps -p $pid >/dev/null; do
+    i=$(( (i+1) % 4 ))
+    printf "[%c] " "${spinstr:$i:1}"
+    sleep $delay
+    printf "\b\b\b"
+  done
+
+  printf "    \b\b\b\b" # Clear the spinner
+}
+
 agent() {
   if [ -z "$1" ]; then
     echo "Usage: agent <prompt>"
@@ -15,8 +31,20 @@ agent() {
   # Parse the JSON response to get the array of commands
   commands=$(echo "$response" | jq -r '.commands | join(";")')
 
+  # Print a loading message
+  echo -e "Executing commands. Please wait...\n"
+  
+  # Start the spinner in the background
+  spinner $$ &
+
   # Execute the commands
   eval "$commands"
+
+  # Stop the spinner
+  kill $! >/dev/null 2>&1
+
+  # Print a message after execution
+  echo -e "\nCommands executed successfully."
 }
 
 # Usage example:
