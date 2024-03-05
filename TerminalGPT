@@ -1,0 +1,73 @@
+#!/bin/bash
+
+PS3="Choose an option (1 or 2): "
+options=("Upload text" "Upload code")
+
+# Replace the following URL with the actual URL of your Express server
+SERVER_URL="http://localhost:3001ls
+/"
+
+echo "How can I help you today?"
+select choice in "${options[@]}"; do
+    case $REPLY in
+        1)
+            echo "You chose to upload text."
+            read -p "Paste the text: " user_input
+            # Add code to create a new file and copy text content
+            echo "Uploaded text: $user_input"
+            # Send data to the server
+            curl -X POST -d "text=$user_input" "$SERVER_URL"
+            break
+            ;;
+        2)
+            echo "You chose to upload code."
+            read -p "Paste the code: " user_input
+            # Add code to create a new file and copy code content
+            echo "Uploaded code: $user_input"
+            # Send data to the server
+            curl -X POST -d "code=$user_input" "$SERVER_URL"
+            break
+            ;;
+        3)
+            # Read text from the user
+            read -p "Enter text to send to the server: " text
+
+            # Send a POST request to the Express server using curl
+            response=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"text\": \"$text\"}" $SERVER_URL)
+
+            echo "Server response: $response"
+
+            # Wait for user input before exiting
+            read -p "Press any key to exit..."
+            ;;
+        4)
+            echo "Enter or paste text. Press Ctrl+D on a new line to finish."
+
+# Read text from the user
+text=""
+while IFS= read -r line; do
+    text+="$line"$'\n'
+done
+
+# Send a POST request to the Express server using curl
+response=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"text\": \"$text\"}" $SERVER_URL)
+
+echo "Server response: $response"
+        
+        ;;
+        5)
+        echo "Enter or paste text. Press Ctrl+D on a new line to finish."
+
+# Read text from the user and format it as a JSON string using jq
+text=$(jq -s -R .)
+
+# Send a POST request to the Express server using curl
+response=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"text\": $text}" $SERVER_URL)
+
+echo "Server response: $response"
+        ;;
+        *)
+            echo "Invalid choice. Please choose 1 or 2."
+            ;;
+    esac
+done

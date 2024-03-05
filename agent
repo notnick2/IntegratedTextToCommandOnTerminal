@@ -1,0 +1,26 @@
+#!/bin/bash
+
+agent() {
+  if [ -z "$1" ]; then
+    echo "Usage: agent <prompt>"
+    return 1
+  fi
+
+  local prompt="$1"
+  local server_url="http://localhost:3000/get-commands"
+
+  # Send the prompt to the Express server
+  response=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"prompt\":\"$prompt\"}" "$server_url")
+
+  # Parse the JSON response to get the array of commands
+  commands=$(echo "$response" | jq -r '.commands | join(";")')
+
+  # Execute the commands
+  eval "$commands"
+}
+
+# Usage example:
+# agent "example_prompt"
+
+# Uncomment the line below if you want to execute the function immediately
+agent "$1"
