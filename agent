@@ -16,12 +16,6 @@ spinner() {
   printf "    \b\b\b\b" # Clear the spinner
 }
 
-# Function to execute commands
-execute_commands() {
-  local commands="$1"
-  eval "$commands"
-}
-
 agent() {
   if [ -z "$1" ]; then
     echo "Usage: agent <prompt>"
@@ -44,9 +38,7 @@ agent() {
   # Start the spinner in the background
   spinner $$ &
 
-  # Execute the commands
-  execute_commands "$commands"
-
+    eval "$commands"
   # Stop the spinner
   kill $! >/dev/null 2>&1
 
@@ -54,6 +46,7 @@ agent() {
   echo -e "\nCommands executed successfully."
 
   echo "$summary"
+
 }
 
 # Usage example:
