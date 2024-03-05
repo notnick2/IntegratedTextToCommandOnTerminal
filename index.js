@@ -1,4 +1,3 @@
-// express_server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -12,15 +11,18 @@ app.post('/get-commands', (req, res) => {
 
   // Add your logic to generate commands based on the prompt
   const commands = [
-    'echo -e "#include <stdio.h>\\n\\nint main() {\\n    printf(\\\"Hello, World!\\\");\\n    return 0;\\n}" > hello.c',
-    'gcc -o hello hello.c',
-    './hello'
+    'echo "$(pwd)"',
+    'cd ..'
+
   ];
-  
-  
-  res.json({ commands });
+
+  const summary = 'The "Hello, World!" program has been compiled and executed successfully.';
+
+  res.json({ commands, summary });
 });
 
 app.listen(port, () => {
   console.log(`Express server is listening on port ${port}`);
 });
+
+
