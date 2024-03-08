@@ -1,21 +1,5 @@
 #!/bin/bash
 
-spinner() {
-  local pid=$1
-  local delay=0.15
-  local spinstr='|/-\'
-  local i=0
-  
-  while ps -p $pid >/dev/null; do
-    i=$(( (i+1) % 4 ))
-    printf "[%c] " "${spinstr:$i:1}"
-    sleep $delay
-    printf "\b\b\b"
-  done
-
-  printf "    \b\b\b\b" # Clear the spinner
-}
-
 agent() {
   if [ -z "$1" ]; then
     echo "Usage: agent <prompt>"
@@ -23,34 +7,59 @@ agent() {
   fi
 
   local prompt="$1"
-  local server_url="http://localhost:3000/get-commands"
 
-  # Send the prompt to the Express server
-  response=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"prompt\":\"$prompt\"}" "$server_url")
+  echo "$prompt"
 
-  # Parse the JSON response to get the array of commands
-  commands=$(echo "$response" | jq -r '.commands | join(";")')
-  summary=$(echo "$response" | jq -r '.summary')
 
-  # Print a loading message
-  echo -e "Executing commands. Please wait..\n"
+response=$(curl -s https://api.openai.com/v1/chat/completions \
+ -H "Content-Type: application/json" \
+ -H "Authorization: Bearer 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" \
+ -d '{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+     {
+        "role": "system",
+        "content": "Return an array of sequential bash commands to achieve the functionality mentioned in the prompt.array format is commands:[]. only return the array and nothing else. only the array should be returned no other texts or anything. no whitespaces"
+     },
+      {
+        "role": "user",
+        "content": "'"$prompt"'"
+      }
+    ],
+    "temperature": 1,
+    "max_tokens": 256,
+    "top_p": 1,
+    "frequency_penalty": 0,
+    "presence_penalty": 0
+  }')
   
-  # Start the spinner in the background
-  spinner $$ &
 
-    eval "$commands"
-  # Stop the spinner
-  kill $! >/dev/null 2>&1
+conten=$(echo "$response" | jq -r '.choices[0].message.content | type')
+echo "$conten"
 
-  # Print a message after execution
+
+ commands=$(echo "$response" | jq -r '.choices[0].message.content | join(";")')
+
+echo "$commands"
+  echo -e "Executing commands. Please wait..\n"
+
+ echo "$commands"
+
+
+
+
+IFS=';' read -ra command_array <<< "$commands"
+
+for command in "${command_array[@]}"; do
+    echo "Executing: $command"
+  #  eval "$command"
+     done
+
+
   echo -e "\nCommands executed successfully."
 
-  echo "$summary"
 
 }
 
-# Usage example:
-# agent "example_prompt"
 
-# Uncomment the line below if you want to execute the function immediately
 agent "$1"
