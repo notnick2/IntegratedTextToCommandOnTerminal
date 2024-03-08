@@ -4,3 +4,6 @@ node_modules/
 # miscellaneous test files
 
 misc/
+
+# .env file
+.env
