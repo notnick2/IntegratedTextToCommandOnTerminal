@@ -47,13 +47,14 @@ echo "here"
 
 
 # Convert the string into an array
-IFS=$'@#$' read -r -a commands <<< "$content"
+IFS=$'@#!' read -r -a commands <<< "$content"
 
 echo "$commands"
 
 # Iterate over the array
 for command in "${commands[@]}"; do
     echo "$command"
+    eval "$commands"
 done
 
 #conten=$(echo "$response" | jq -r '.choices[0].message.content | type')
